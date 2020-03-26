@@ -1,2 +1,2 @@
 # loginPost
-Node.js Mysql  passport 익명게시판
+Node.js Mysql  passport 로그인 
