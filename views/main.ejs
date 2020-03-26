@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+<head>
+    <title>메인페이지</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="page-header">
+            <h2>익명 게시판</h2>
+        </div>
+        <table class="table table-striped">
+            <th>id</th>
+            <th>작성자</th>
+            <th>제목</th>
+            <th>작성일</th>
+            <%  for(var i=0;i<posts.length;i++){
+                var post=posts[i] %>
+                <tr>
+                    <td><%=post.id%></td>
+                    <td><%=post.nickname%></td>
+                    <td><a href="/view_post/<%=post.id%>"><%=post.title%></a></td>
+                    <td><%=post.wtime%></td>
+                </tr>
+            <% } %>
+        </table>
+        <button type="button" class="btn btn-success btn-lg" onClick="location.href='/create_post'">글쓰기</button>&nbsp;
+    </div>
+</body>

@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+<head>
+    <title>댓글 삭제</title>
+    <meta charset="utf-8">
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="page-header">
+            <h2>댓글 삭제</h2>
+        </div>
+        <form action="/api/delete_comment" method="post">
+            <h3>정말로 삭제하시겠습니까?</h3>
+            <input type="hidden" name="id" value="<%=commentid%>">
+            <button type="submit" class="btn btn-danger btn-block">삭제</button>
+        </form><br>
+        <button type="button" class="btn btn-info btn-lg" onClick="history.back();">이전</button>&nbsp;
+        <button type="button" class="btn btn-info btn-lg" onClick="location.href='/'">게시판 보러가기</button>&nbsp;
+    </div>
+</body>

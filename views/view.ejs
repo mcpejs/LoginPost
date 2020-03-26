@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+<head>
+    <title><%=post.title%></title>
+    <meta charset="utf-8">
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+    <div class="container content">
+        <div class="page-header">
+            <h2><%=post.title%></h2>
+        </div>
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h4 class="panel-title"><%=post.nickname%>&nbsp;&nbsp;&nbsp;<%=post.wtime%></h4></div>
+            <div class="panel-body">
+                <div class="content post" style="line-height:30px;white-space: pre-line;"><%=post.content%></div>
+            </div>
+        </div>
+        <%  for(var i=0;i<comments.length;i++){
+            var comment=comments[i] %>
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h4 class="panel-title pull-left"><%=comment.nickname%>&nbsp;&nbsp;&nbsp;<%=comment.wtime%></h4>
+                    <button class="btn pull-right" onclick="location.href='/delete_comment/<%=comment.id%>'">삭제</button>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="panel-body">
+                    <div class="content post">
+                        <p><%=comment.content%></p>
+                    </div>
+                </div>
+            </div>
+        <% } %>
+        <form action="/api/create_comment" class="form-inline" method="post">
+            <input type="hidden" name="postid" value="<%=post.id%>">
+            <p>
+                <div class="form-group">
+                <label for="nickanme">이름</label>
+                <input type="text" class="form-control" name="nickname" placeholder="이름">
+                </div>
+                <div class="form-group">
+                <label for="password">비밀번호</label>
+                <input type="text" class="form-control" name="password" placeholder="0-9 4자리 이하 비밀번호">
+                </div>
+            </p>
+            <p>
+                <div class="form-group" cols="60">
+                <label for="content&quot;">내용</label>
+                <textarea class="form-control" cols="60" name="content" rows="3" placeholder="댓글 내용"></textarea>
+            </div>
+            </p>
+            <button type="submit" class="btn btn-success btn-block" cols="60">댓글 작성</button>
+        </form><br>
+        <button type="button" class="btn btn-success btn-lg" onClick="location.href='/create_post'">글쓰기</button>&nbsp;
+        <button type="button" class="btn btn-danger btn-lg" onClick="location.href='/delete_post/<%=post.id%>'">이글 삭제하기</button>&nbsp;
+        <button type="button" class="btn btn-warning btn-lg" onClick="location.href='/update_post/<%=post.id%>'">이글 수정하기</button>&nbsp;
+        <button type="button" class="btn btn-info btn-secondary btn-lg" onClick="location.href='/'">게시판 보러가기</button>
+    </div>
+</body>

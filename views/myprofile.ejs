@@ -1,0 +1,29 @@
+<html>
+
+<head>
+    <title>내 정보</title>
+    <meta charset="utf-8">
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+    <div class="container content">
+        <div class="page-header">
+            <h2>프로필</h2>
+        </div>
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h4 class="panel-title">내 닉네임</h4>
+            </div>
+            <div class="panel-body">
+                <div class="content post" style="line-height:30px;white-space: pre-line;">
+                    <h5><%=nickname%></h5>
+                </div>
+            </div>
+        </div>
+        <button type="button" class="btn btn-info btn-lg" onClick="location.href='/api/logout'">로그아웃</button>&nbsp;
+</body>
+
+</html>
