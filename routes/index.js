@@ -19,41 +19,53 @@ router.get('/', function (req, res) {
 router.get('/list_post/:page', function (req, res) {
     let postperpage = 10
 
-    // 첫게시글은 0번째이기 때문에 요청 -1을 해줍니다
-    let requestPage = req.params.page - 1
+    // 요청자의 첫페이지는 1 페이지입니다.
+    let requestPage = req.params.page
 
     // 게시판 페이지 번호는 숫자만 들어와야합니다.
     if (isNaN(requestPage)) {
         res.status(404)
         res.send('<script type="text/javascript">alert("정상적인 접근이 아닙니다.");location.href="/"</script>')
     }
+    requestPage=Number(requestPage)
     db.query('select count(*) as postcount from posts;', function (err, data, fields) {
 
         // 마지막 페이지를 알기위한 게시물수
         let postcount = data[0].postcount
 
-        // 게시물을 보기위한 마지막 페이지
-        let lastPage = Math.floor(postcount / postperpage)
+        // 게시물을 보기위한 마지막 페이지를 구합니다
+        // 요청자 입장에서의 마지막페이지를 구하기위해 1을 더합니다.
+        let lastPage = Math.floor(postcount / postperpage)+1
 
         let startIndex
-        if (lastPage <= requestPage) {
-            // 만약 요청페이지가 마지막 페이지 이상이라면
-            // 마지막 페이지의 결과를 보여줍니다.
-            startIndex = postcount - postperpage
+        if (lastPage < requestPage) {
+            // 만약 요청페이지가 마지막 페이지를 넘었다면
+            // 이전 페이지로 돌려보냅니다.
+            res.status(404)
+            res.send('<script type="text/javascript">alert("해당 페이지는 없습니다.");history.back(1)</script>')
+            return
         } else if (requestPage < 1) {
             // 만약 요청페이지가 1페이지보다 작다면
-            // 1페이지의 결과를 보여줍니다.
-            startIndex = 0
+            // 이전 페이지로 돌려보냅니다.
+            res.status(404)
+            res.send('<script type="text/javascript">alert("해당 페이지는 없습니다.");history.back(1)</script>')
+            return
+        } else if(requestPage==lastPage){
+            // 만약 요청페이지가 마지막 페이지라면
+            // 뒤에서부터 10개의 글만 보여줍니다.
+            startIndex = postcount - postperpage
         } else {
-            // 위 조건에 모두 해당하지 않는다면
-            // 해당하는 페이지를 보여줍니다.
-            startIndex = postperpage * requestPage
+            // 위 조건에 모두 해당하지 않는 페이지라면
+            // 모든 페이지에 같은 방법을 적용해 글을 구합니다.
+            startIndex = postperpage * (requestPage-1)
         }
 
         let readpostquery = `SELECT * FROM posts ORDER BY id desc LIMIT ${startIndex},${postperpage}`
         db.query(readpostquery, function (err, posts, fields) {
             res.render('../views/main', {
-                posts: posts
+                posts: posts,
+                currentPage:Number(requestPage),
+                lastPage:lastPage
             })
         })
     })
