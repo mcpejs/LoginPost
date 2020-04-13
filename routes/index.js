@@ -82,11 +82,13 @@ router.get('/create_post', ifAuthenticated, function (req, res) {
 })
 
 router.get('/view_post/:id', function (req, res) {
-    let post;
+    // 글 내용을 읽기위한 쿼리
     let readsinglequery = `SELECT * FROM posts WHERE id=${req.params.id}`
+
+    // 댓글 내용을 읽기위한 쿼리
     let commentsquery = `SELECT * FROM comments WHERE postid=${req.params.id}`
     db.query(readsinglequery, function (err, postdata, fields) {
-        post = postdata[0]
+        let post = postdata[0]
         db.query(commentsquery, function (err, commentsdata, fields) {
             res.render('../views/view', {
                 post: post,

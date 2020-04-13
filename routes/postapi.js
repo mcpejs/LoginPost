@@ -22,6 +22,7 @@ router.post('/create_post',ifAuthenticated, function (req, res) {
         return
     }
 
+    // NOW() 함수 사용을 위해서 set를 사용하지않음
     let createquery = `INSERT INTO posts(nickname,title,content,wtime) VALUES("${nickname}","${title}","${content}",NOW())`
     db.query(createquery, function (err, result, fields) {
         if (err) {
