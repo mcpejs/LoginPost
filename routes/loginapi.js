@@ -48,18 +48,13 @@ passport.use(new LocalStrategy((username, password, done) => {
     })
 }))
 
-// 유저 객체에서 아이디값 반환
+// 유저 객체에서 식별자인 닉네임 반환
 passport.serializeUser(function (user, done) {
     done(null, user.name)
 })
 
 passport.deserializeUser(function (name, done) {
-    let getuserquery = 'select name from accounts where name=?'
-    db.query(getuserquery, name, function (err, data) {
-        if (data[0]) {
-            return done(null, data[0])
-        }
-    })
+    done(null, name)
 })
 
 router.post('/login', passport.authenticate('local', {
