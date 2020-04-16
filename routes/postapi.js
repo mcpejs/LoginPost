@@ -57,7 +57,7 @@ router.post('/update_post', ifAuthenticated, function (req, res) {
     db.query(getPostAuthorquery,postid, function (err, data, fields) {
         let postAuthor = data[0].nickname
         if (postAuthor == nickname) {
-            db.query(updatePostquery,[title,content.postid], function (err, data, fields) {
+            db.query(updatePostquery,[title,content,postid], function (err, data, fields) {
                 if (err) {
                     // 만약 에러가 있다면
                     res.status(401)
