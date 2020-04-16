@@ -15,11 +15,12 @@
         </div>
         <div class="panel panel-primary">
             <div class="panel-heading">
-                <h4 class="panel-title">내 닉네임</h4>
+                <h4 class="panel-title">내 정보</h4>
             </div>
             <div class="panel-body">
                 <div class="content post" style="line-height:30px;white-space: pre-line;">
-                    <h5><%=nickname%></h5>
+                    <h5>내 닉네임:<%=userInfo.name%></h5>
+                    <h5><%=userInfo.isAdmin?'관리자입니다.':'관리자가 아닙니다.'%></h5>
                 </div>
             </div>
         </div>

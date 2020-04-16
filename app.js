@@ -27,7 +27,7 @@ app.set('views', 'views');
 app.use(passport.initialize());
 app.use(passport.session());
 
-// 로그인 했을경우 매 요청시마다 세션에 유저정보를 갱신하는 라우터
+// 로그인 했을경우 세션에 유저정보를 저장하는 라우터
 let putUserInfo = (req, res, next) => {
     if (req.isAuthenticated()) {
         let getUserInfo = 'SELECT * FROM accounts WHERE name=?'

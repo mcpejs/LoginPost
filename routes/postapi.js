@@ -15,7 +15,7 @@ router.post('/create_post', ifAuthenticated, function (req, res) {
     let title = req.body.title
     let content = req.body.content
 
-    if (ishaveEmpty([nickname, title, console])) {
+    if (ishaveEmpty(nickname, title, console)) {
         // 정보가 잘못 제출되었을때
         res.status(401)
         res.send('<script type="text/javascript">alert("모든값은 입력되어야합니다");history.back();</script>')
@@ -44,20 +44,20 @@ router.post('/update_post', ifAuthenticated, function (req, res) {
     let title = req.body.title
     let content = req.body.content
 
-    if (ishaveEmpty([postid, nickname, title, content])) {
+    if (ishaveEmpty(postid, nickname, title, content)) {
         // 정보가 잘못 제출되었을때
         res.status(401)
         res.send('<script type="text/javascript">alert("모든값은 입력되어야힙니다.");history.back();</script>')
         return
     }
 
-    let getPostAuthorquery = `SELECT nickname FROM posts WHERE id=${postid}`
-    let updatequery = `UPDATE posts set title="${title}",content="${content}" where id=${postid};`
+    let getPostAuthorquery = `SELECT nickname FROM posts WHERE id=?`
+    let updatePostquery = `UPDATE posts set title=?,content=? where id=?;`
 
-    db.query(getPostAuthorquery, function (err, data, fields) {
+    db.query(getPostAuthorquery,postid, function (err, data, fields) {
         let postAuthor = data[0].nickname
         if (postAuthor == nickname) {
-            db.query(updatequery, function (err, data, fields) {
+            db.query(updatePostquery,[title,content.postid], function (err, data, fields) {
                 if (err) {
                     // 만약 에러가 있다면
                     res.status(401)
@@ -79,16 +79,17 @@ router.post('/delete_post', function (req, res) {
     let postid = req.body.id
     let nickname = req.session.userInfo.name
     let isAdmin = req.session.userInfo.isAdmin
+
     let getPostAuthorquery = 'SELECT nickname FROM posts WHERE id=?'
-    let deletepostquery = 'DELETE FROM posts WHERE id=?'
-    let deletecommentsquery = 'DELETE FROM comments WHERE postid=?'
+    let deletePostquery = 'DELETE FROM posts WHERE id=?'
+    let deleteCommentsquery = 'DELETE FROM comments WHERE postid=?'
     db.query(getPostAuthorquery, postid, function (err, authorData, fields) {
         let postAuthor = authorData[0].nickname
 
         // 요청자가 글 작성자라면
         if (nickname == postAuthor) {
             // 댓글 삭제후 글삭제
-            db.query(deletecommentsquery, postid, () => db.query(deletepostquery, postid))
+            db.query(deleteCommentsquery, postid, () => db.query(deletePostquery, postid))
             res.status(200)
             res.send(`<script type="text/javascript">alert("성공적으로 삭제되었습니다.");location.href = '/';</script>`)
         }
@@ -96,12 +97,12 @@ router.post('/delete_post', function (req, res) {
         // 요청자가 관리자라면
         else if (isAdmin) {
             // 댓글 삭제후 글삭제
-            db.query(deletecommentsquery, postid, () => db.query(deletepostquery, postid))
+            db.query(deleteCommentsquery, postid, () => db.query(deletePostquery, postid))
             res.status(200)
             res.send(`<script type="text/javascript">alert("관리자 권한으로 삭제되었습니다.");location.href = '/';</script>`)
         }
 
-        // 관리자가 아닌 타인이라면
+        // 관리자가 아닌 일반 유저라면
         else {
             res.status(401)
             res.send(`<script type="text/javascript">alert("자신의 글만 삭제할수있습니다.");location.href = '/';</script>`)
@@ -113,7 +114,7 @@ router.post('/create_comment', ifAuthenticated, function (req, res) {
     let nickname = req.session.userInfo.name
     let content = req.body.content
     let postid = req.body.postid
-    if (ishaveEmpty([nickname, postid, content])) {
+    if (ishaveEmpty(nickname, postid, content)) {
         // 정보가 잘못 제출되었을때
         res.status(401)
         res.send('<script type="text/javascript">alert("모든값은 입력되어야합니다.");history.back();</script>')
@@ -124,11 +125,11 @@ router.post('/create_comment', ifAuthenticated, function (req, res) {
     let checkpostidquery = `select id from posts where id = ${postid};`
     db.query(checkpostidquery, function (err, data, fields) {
         if (err || !data.length) {
-            // 만약 게시글 번호가 없다면
+            // 만약 게시글이 없다면
             res.status(401)
             res.send(`<script type="text/javascript">alert("없는 게시글 번호입니다.");history.back();</script>`)
         } else {
-            // 만약 게시글 번호가 있다면
+            // 만약 게시글이 있다면 댓글작성
             db.query(createcommentquery, function (err, result, fields) {
                 if (err) {
                     console.log(err)
@@ -153,11 +154,11 @@ router.post('/delete_comment', function (req, res) {
     let getCommentAuthorquery = `SELECT postid,nickname FROM comments WHERE id=${commentid}`
     let deletecommentquery = `DELETE FROM comments WHERE id=${commentid}`
     db.query(getCommentAuthorquery, function (err, data, fields) {
-        let commentnickname = data[0].nickname
+        let commentAuthor = data[0].nickname
         let postid = data[0].postid
 
         // 요청자가 댓글 작성자라면
-        if (commentnickname == nickname) {
+        if (commentAuthor == nickname) {
             db.query(deletecommentquery, function (err, data, fields) {
                 res.status(200)
                 res.send(`<script type="text/javascript">alert("성공적으로 삭제되었습니다.");location.href='/view_post/${postid}';</script>`)
@@ -171,7 +172,7 @@ router.post('/delete_comment', function (req, res) {
                 res.send(`<script type="text/javascript">alert("관리자 권한으로 삭제되었습니다.");location.href='/view_post/${postid}';</script>`)
             })
         } 
-        
+
         // 관리자가 아닌 타인이라면
         else {
             res.status(401)
@@ -181,7 +182,7 @@ router.post('/delete_comment', function (req, res) {
 })
 
 // 값없는 변수가 포함되있는지 확인하는 함수
-function ishaveEmpty(array) {
+function ishaveEmpty(...array) {
     let flag = false
     array.forEach(function (element) {
         if (!Boolean(element)) {

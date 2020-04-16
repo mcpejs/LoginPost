@@ -32,12 +32,18 @@
         <nav>
             <ul class="pagination">
                 <li class="page-item"><a class="page-link" href="/list_post/1">Start</a></li>
-              <li class="page-item"><a class="page-link" href="/list_post/<%=currentPage-1%>">Prev</a></li>
-              <li class="page-item"><a class="page-link" href="/list_post/<%=currentPage%>"><%=currentPage%></a></li>
-              <li class="page-item"><a class="page-link" href="/list_post/<%=currentPage+1%>">Next</a></li>
-              <li class="page-item"><a class="page-link" href="/list_post/<%=lastPage%>">Last</a></li>
+                <li class="page-item"><a class="page-link" href="/list_post/<%=currentPage-1%>">Prev</a></li>
+                <li class="page-item"><a class="page-link" href="/list_post/<%=currentPage%>"><%=currentPage%></a></li>
+                <li class="page-item"><a class="page-link" href="/list_post/<%=currentPage+1%>">Next</a></li>
+                <li class="page-item"><a class="page-link" href="/list_post/<%=lastPage%>">Last</a></li>
             </ul>
-          </nav>
-        <button type="button" class="btn btn-success btn-lg" onClick="location.href='/create_post'">글쓰기</button>&nbsp;
+        </nav>
+          
+        <% if(isAuthenticated){%>
+            <button type="button" class="btn btn-success btn-lg" onClick="location.href='/create_post'">글쓰기</button>&nbsp;
+            <button type="button" class="btn btn-info btn-secondary btn-lg" onClick="location.href='/profile'">내 프로필 보기</button>&nbsp;
+        <% } else {%>
+            <button type="button" class="btn btn-success btn-lg" onClick="location.href='/login'">로그인</button>&nbsp;
+        <% } %>
     </div>
 </body>

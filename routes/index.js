@@ -1,6 +1,7 @@
 const express = require('express')
 const path = require('path')
 const router = express.Router()
+let db = require('../db/db')
 
 // 로그인되지 않았다면 로그인페이지로 연결하는 라우터
 let ifAuthenticated = (req, res, next) => {
@@ -27,7 +28,7 @@ router.get('/list_post/:page', function (req, res) {
         res.status(404)
         res.send('<script type="text/javascript">alert("정상적인 접근이 아닙니다.");location.href="/"</script>')
     }
-    requestPage=Number(requestPage)
+    requestPage = Number(requestPage)
     db.query('select count(*) as postcount from posts;', function (err, data, fields) {
 
         // 마지막 페이지를 알기위한 게시물수
@@ -35,7 +36,7 @@ router.get('/list_post/:page', function (req, res) {
 
         // 게시물을 보기위한 마지막 페이지를 구합니다
         // 요청자 입장에서의 마지막페이지를 구하기위해 1을 더합니다.
-        let lastPage = Math.floor(postcount / postperpage)+1
+        let lastPage = Math.floor(postcount / postperpage) + 1
 
         let startIndex
         if (lastPage < requestPage) {
@@ -50,30 +51,35 @@ router.get('/list_post/:page', function (req, res) {
             res.status(404)
             res.send('<script type="text/javascript">alert("해당 페이지는 없습니다.");history.back(1)</script>')
             return
-        } else if(requestPage==lastPage){
+        } else if (requestPage == lastPage) {
             // 만약 요청페이지가 마지막 페이지라면
             // 뒤에서부터 10개의 글만 보여줍니다.
             startIndex = postcount - postperpage
         } else {
             // 위 조건에 모두 해당하지 않는 페이지라면
             // 모든 페이지에 같은 방법을 적용해 글을 구합니다.
-            startIndex = postperpage * (requestPage-1)
+            startIndex = postperpage * (requestPage - 1)
         }
 
         let readpostquery = `SELECT * FROM posts ORDER BY id desc LIMIT ${startIndex},${postperpage}`
         db.query(readpostquery, function (err, posts, fields) {
             res.render('../views/main', {
                 posts: posts,
-                currentPage:Number(requestPage),
-                lastPage:lastPage
+                currentPage: Number(requestPage),
+                lastPage: lastPage,
+                isAuthenticated:req.isAuthenticated()
             })
         })
     })
 })
 
 router.get('/profile', ifAuthenticated, function (req, res) {
-    res.render('../views/myprofile', {
-        nickname: req.session.passport.user
+    let getUserInfo = 'SELECT * FROM accounts WHERE name=?'
+    db.query(getUserInfo, req.session.passport.user, function (err, data, fields) {
+        let userInfo = data[0]
+        res.render('../views/myprofile', {
+            userInfo: userInfo
+        })
     })
 })
 
