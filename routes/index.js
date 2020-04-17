@@ -75,7 +75,7 @@ router.get('/list_post/:page', function (req, res) {
 
 router.get('/profile', ifAuthenticated, function (req, res) {
     let getUserInfo = 'SELECT * FROM accounts WHERE name=?'
-    db.query(getUserInfo, req.session.passport.user, function (err, data, fields) {
+    db.query(getUserInfo, req.user, function (err, data, fields) {
         let userInfo = data[0]
         res.render('../views/myprofile', {
             userInfo: userInfo

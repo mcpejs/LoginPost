@@ -27,26 +27,38 @@ app.set('views', 'views');
 app.use(passport.initialize());
 app.use(passport.session());
 
-// 로그인 했을경우 세션에 유저정보를 저장하는 라우터
+// 로그인 했을경우 유저정보를 저장하는 라우터
 let putUserInfo = (req, res, next) => {
     if (req.isAuthenticated()) {
         let getUserInfo = 'SELECT * FROM accounts WHERE name=?'
-        db.query(getUserInfo, req.session.passport.user, function (err, data, fields) {
+        db.query(getUserInfo, req.user, function (err, data, fields) {
             req.session.userInfo = data[0]
             next()
         })
-    } else {
-        next()
+        return
     }
+    res.send(`<script type="text/javascript">alert("로그인한후 이용해주세요");location.href = '/';</script>`)
+}
+
+let ifAdmin = (req, res, next) => {
+    if (req.session.userInfo.isAdmin) {
+        next()
+        return
+    }
+    res.send(`<script type="text/javascript">alert("당신은 관리자가 아닙니다");location.href = '/';</script>`)
 }
 
 // 백엔드 api 라우터들
 let loginRouter = require('./routes/loginapi')
 let postRouter = require('./routes/postapi')
-app.use('/api', putUserInfo, loginRouter, postRouter)
+app.use('/api', loginRouter, putUserInfo, postRouter)
 
-// 프론트엔드 페이지 라우터`
+// 프론트엔드 페이지 라우터
 let indexRouter = require('./routes/index')
 app.use('/', indexRouter)
+
+// 관리자 페이지 라우터
+let adminRouter = require('./routes/admin')
+app.use('/admin', putUserInfo, ifAdmin, adminRouter)
 
 app.listen(3000)

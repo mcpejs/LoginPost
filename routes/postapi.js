@@ -10,7 +10,20 @@ let ifAuthenticated = (req, res, next) => {
     res.redirect('/login')
 }
 
-router.post('/create_post', ifAuthenticated, function (req, res) {
+let ifIgnored = (req, res, next) => {
+    // 차단 당했다면
+    if (req.session.userInfo.isIgnore) {
+        res.status(200)
+        res.send(`<script type="text/javascript">alert("당신은 차단당했습니다");location.href = '/';</script>`)
+        return
+    }
+    // 차단 당하지 않았다면
+    next()
+    
+}
+
+router.post('/create_post', ifAuthenticated, ifIgnored, function (req, res) {
+
     let nickname = req.session.userInfo.name
     let title = req.body.title
     let content = req.body.content
@@ -54,10 +67,10 @@ router.post('/update_post', ifAuthenticated, function (req, res) {
     let getPostAuthorquery = `SELECT nickname FROM posts WHERE id=?`
     let updatePostquery = `UPDATE posts set title=?,content=? where id=?;`
 
-    db.query(getPostAuthorquery,postid, function (err, data, fields) {
+    db.query(getPostAuthorquery, postid, function (err, data, fields) {
         let postAuthor = data[0].nickname
         if (postAuthor == nickname) {
-            db.query(updatePostquery,[title,content,postid], function (err, data, fields) {
+            db.query(updatePostquery, [title, content, postid], function (err, data, fields) {
                 if (err) {
                     // 만약 에러가 있다면
                     res.status(401)
@@ -110,7 +123,7 @@ router.post('/delete_post', function (req, res) {
     })
 })
 
-router.post('/create_comment', ifAuthenticated, function (req, res) {
+router.post('/create_comment', ifAuthenticated, ifIgnored, function (req, res) {
     let nickname = req.session.userInfo.name
     let content = req.body.content
     let postid = req.body.postid
@@ -163,7 +176,7 @@ router.post('/delete_comment', function (req, res) {
                 res.status(200)
                 res.send(`<script type="text/javascript">alert("성공적으로 삭제되었습니다.");location.href='/view_post/${postid}';</script>`)
             })
-        } 
+        }
 
         // 요청자가 관리자라면
         else if (isAdmin) {
@@ -171,7 +184,7 @@ router.post('/delete_comment', function (req, res) {
                 res.status(200)
                 res.send(`<script type="text/javascript">alert("관리자 권한으로 삭제되었습니다.");location.href='/view_post/${postid}';</script>`)
             })
-        } 
+        }
 
         // 관리자가 아닌 타인이라면
         else {
