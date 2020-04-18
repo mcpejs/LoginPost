@@ -1,7 +1,7 @@
 <html>
 
 <head>
-    <title>내 정보</title>
+    <title>관리자 전용 페이지</title>
     <meta charset="utf-8">
     <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
@@ -11,25 +11,20 @@
 <body>
     <div class="container content">
         <div class="page-header">
-            <h2>프로필</h2>
+            <h2>관리자 페이지</h2>
         </div>
         <div class="panel panel-primary">
             <div class="panel-heading">
-                <h4 class="panel-title">내 정보</h4>
+                <h4 class="panel-title">기능 목록</h4>
             </div>
             <div class="panel-body">
                 <div class="content post" style="line-height:30px;white-space: pre-line;">
-                    <h5>내 닉네임:<%=userInfo.name%></h5>
-                    <% if(userInfo.isAdmin){%>
-                        <h5><a href="/admin">관리자입니다</a></h5>
-                    <% } else {%>
-                        <h5>관리자가 아닙니다</h5>
-                    <% } %>
-                    <h5><%=userInfo.isIgnore?'차단됐습니다.':'차단되지 않았습니다.'%></h5>
+                    <h5><a href="/admin/ignoreList">차단목록 관리하기</a></h5>
+                    <h5><a href="/admin/ignoreTool">원하는 유저 차단하기</a></h5>
                 </div>
             </div>
         </div>
-        <button type="button" class="btn btn-info btn-lg" onClick="location.href='/api/logout'">로그아웃</button>&nbsp;
+        <button type="button" class="btn btn-danger btn-lg" onClick="location.href='/api/logout'">로그아웃</button>&nbsp;
+        <button type="button" class="btn btn-info btn-secondary btn-lg" onClick="location.href='/'">게시판 보러가기</button>
 </body>
-
 </html>

@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<head>
+    <title>메인페이지</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="page-header">
+            <h2>차단 리스트</h2>
+        </div>
+        <table class="table table-striped">
+            <th>닉네임</th>
+            <th>해제하기</th>
+            <%  for(var i=0;i<users.length;i++){
+                var user=users[i] %>
+                <tr>
+                    <td><%=user.name%></td>
+                    <td><a href="/admin/api/unIgnore/<%=user.name%>">이 유저 차단 해제하기</a></td>
+                </tr>
+            <% } %>
+        </table><br>
+        <button type="button" class="btn btn-info btn-lg" onClick="history.back();">이전</button>&nbsp;
+        <button type="button" class="btn btn-info btn-lg" onClick="location.href='/'">게시판 보러가기</button>&nbsp;
+    </div>
+</body>

@@ -27,7 +27,7 @@ app.set('views', 'views');
 app.use(passport.initialize());
 app.use(passport.session());
 
-// 로그인 했을경우 유저정보를 저장하는 라우터
+// 유저정보를 저장하는 라우터
 let putUserInfo = (req, res, next) => {
     if (req.isAuthenticated()) {
         let getUserInfo = 'SELECT * FROM accounts WHERE name=?'
@@ -37,9 +37,11 @@ let putUserInfo = (req, res, next) => {
         })
         return
     }
-    res.send(`<script type="text/javascript">alert("로그인한후 이용해주세요");location.href = '/';</script>`)
+    // 로그인되지않았다면 접근을 거부함
+    res.send(`<script type="text/javascript">alert("로그인한후 이용해주세요");location.href = '/login';</script>`)
 }
 
+// 관리자일때만 접근시키는 라우터
 let ifAdmin = (req, res, next) => {
     if (req.session.userInfo.isAdmin) {
         next()
