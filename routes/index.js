@@ -29,7 +29,7 @@ router.get('/list_post/:page', function (req, res) {
         res.send('<script type="text/javascript">alert("정상적인 접근이 아닙니다.");location.href="/"</script>')
     }
     requestPage = Number(requestPage)
-    db.query('select count(*) as postcount from posts;', function (err, data, fields) {
+    db.query('select count(*) as postcount FROM posts WHERE isNotice=0;', function (err, data, fields) {
 
         // 마지막 페이지를 알기위한 게시물수
         let postcount = data[0].postcount
@@ -61,13 +61,17 @@ router.get('/list_post/:page', function (req, res) {
             startIndex = postperpage * (requestPage - 1)
         }
 
-        let readpostquery = `SELECT * FROM posts ORDER BY id desc LIMIT ${startIndex},${postperpage}`
-        db.query(readpostquery, function (err, posts, fields) {
-            res.render('../views/main', {
-                posts: posts,
-                currentPage: Number(requestPage),
-                lastPage: lastPage,
-                isAuthenticated:req.isAuthenticated()
+        let readpost = `SELECT * FROM posts WHERE isNotice=0 ORDER BY id desc LIMIT ${startIndex},${postperpage}`
+        let readNotice = 'SELECT * FROM posts WHERE isNotice=1 ORDER BY id desc'
+        db.query(readpost, function (err, posts, fields) {
+            db.query(readNotice, function (err, notices) {
+                res.render('../views/main', {
+                    posts: posts,
+                    notices: notices,
+                    currentPage: Number(requestPage),
+                    lastPage: lastPage,
+                    isAuthenticated: req.isAuthenticated()
+                })
             })
         })
     })
@@ -88,17 +92,25 @@ router.get('/create_post', ifAuthenticated, function (req, res) {
 })
 
 router.get('/view_post/:id', function (req, res) {
-    // 글 내용을 읽기위한 쿼리
     let readsinglequery = `SELECT * FROM posts WHERE id=${req.params.id}`
-
-    // 댓글 내용을 읽기위한 쿼리
     let commentsquery = `SELECT * FROM comments WHERE postid=${req.params.id}`
-    db.query(readsinglequery, function (err, postdata, fields) {
-        let post = postdata[0]
-        db.query(commentsquery, function (err, commentsdata, fields) {
+    let getIsAdmin = 'SELECT isAdmin FROM accounts WHERE name=?'
+    db.query(readsinglequery, function (err, post, fields) {
+        db.query(commentsquery, function (err, comments, fields) {
+            if (req.isAuthenticated()) {
+                db.query(getIsAdmin, req.user, function (err, userData) {
+                    res.render('../views/view', {
+                        post: post[0],
+                        comments: comments,
+                        isAdmin: userData[0].isAdmin
+                    })
+                })
+                return
+            }
             res.render('../views/view', {
-                post: post,
-                comments: commentsdata
+                post: post[0],
+                comments: comments,
+                isAdmin: false
             })
         })
 

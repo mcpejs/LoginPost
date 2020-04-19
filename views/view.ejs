@@ -17,7 +17,11 @@
             <div class="panel-heading">
                 <h4 class="panel-title"><%=post.nickname%>&nbsp;&nbsp;&nbsp;<%=post.wtime%></h4></div>
             <div class="panel-body">
-                <div class="content post" style="line-height:30px;white-space: pre-line;"><%=post.content%></div>
+                <% if(post.isAdminAuthor){%>
+                    <div class="content post" style="line-height:30px;white-space: pre-line;"><%-post.content%></div>
+                <% } else {%>
+                    <div class="content post" style="line-height:30px;white-space: pre-line;"><%=post.content%></div>
+                <% } %>
             </div>
         </div>
         <%  for(var i=0;i<comments.length;i++){
@@ -48,6 +52,13 @@
         <button type="button" class="btn btn-success btn-lg" onClick="location.href='/create_post'">글쓰기</button>&nbsp;
         <button type="button" class="btn btn-danger btn-lg" onClick="location.href='/delete_post/<%=post.id%>'">이글 삭제하기</button>&nbsp;
         <button type="button" class="btn btn-warning btn-lg" onClick="location.href='/update_post/<%=post.id%>'">이글 수정하기</button>&nbsp;
-        <button type="button" class="btn btn-info btn-secondary btn-lg" onClick="location.href='/'">게시판 보러가기</button>
+        <button type="button" class="btn btn-info btn-lg" onClick="location.href='/'">게시판 보러가기</button>
+        <% if(isAdmin){%>
+            <% if(post.isNotice){%>
+                <button type="button" class="btn btn-default btn-lg" onClick="location.href='/admin/api/unNotice/<%=post.id%>'">공지 해제하기</button>&nbsp;
+            <% } else {%>
+                <button type="button" class="btn btn-default btn-lg" onClick="location.href='/admin/api/Notice/<%=post.id%>'">공지 등록하기</button>&nbsp;
+            <% } %>
+        <% } %>
     </div>
 </body>

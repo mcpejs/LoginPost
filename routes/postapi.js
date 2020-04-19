@@ -27,7 +27,7 @@ router.post('/create_post', ifAuthenticated, ifIgnored, function (req, res) {
     let nickname = req.session.userInfo.name
     let title = req.body.title
     let content = req.body.content
-
+    let isAdminAuthor=req.session.userInfo.isAdmin
     if (ishaveEmpty(nickname, title, console)) {
         // 정보가 잘못 제출되었을때
         res.status(401)
@@ -36,7 +36,7 @@ router.post('/create_post', ifAuthenticated, ifIgnored, function (req, res) {
     }
 
     // NOW() 함수 사용을 위해서 set를 사용하지않음
-    let createquery = `INSERT INTO posts(nickname,title,content,wtime) VALUES("${nickname}","${title}","${content}",NOW())`
+    let createquery = `INSERT INTO posts(nickname,title,content,wtime,isNotice,isAdminAuthor) VALUES("${nickname}","${title}","${content}",NOW(),0,"${isAdminAuthor}")`
     db.query(createquery, function (err, result, fields) {
         if (err) {
             console.log(err)
@@ -199,7 +199,7 @@ function ishaveEmpty(...array) {
     let flag = false
     array.forEach(function (element) {
         if (!Boolean(element)) {
-            flag = true
+            flag = true 
             return
         }
     })

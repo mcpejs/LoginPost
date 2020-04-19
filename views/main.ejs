@@ -12,7 +12,26 @@
 <body>
     <div class="container">
         <div class="page-header">
-            <h2>익명 게시판</h2>
+            <h2>공지</h2>
+        </div>
+        <table class="table table-striped">
+            <th>id</th>
+            <th>작성자</th>
+            <th>제목</th>
+            <th>작성일</th>
+            <%  for(var i=0;i<notices.length;i++){
+                var notice=notices[i] %>
+                <tr class="info">
+                    <td><%=notice.id%></td>
+                    <td><%=notice.nickname%></td>
+                    <td><a href="/view_post/<%=notice.id%>"><%=notice.title%></a></td>
+                    <td><%=notice.wtime%></td>
+                </tr>
+            <% } %>
+        </table>
+
+        <div class="page-header">
+            <h2>게시판</h2>
         </div>
         <table class="table table-striped">
             <th>id</th>
@@ -21,7 +40,7 @@
             <th>작성일</th>
             <%  for(var i=0;i<posts.length;i++){
                 var post=posts[i] %>
-                <tr>
+                <tr class="active">
                     <td><%=post.id%></td>
                     <td><%=post.nickname%></td>
                     <td><a href="/view_post/<%=post.id%>"><%=post.title%></a></td>

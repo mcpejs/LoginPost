@@ -47,4 +47,22 @@ router.get('/api/unIgnore/:name', function (req, res) {
     })
 })
 
+// 공지 등록기능
+router.get('/api/Notice/:id',function(req,res){
+    let postid=req.params.id
+    let noticePost = 'UPDATE posts SET isNotice=1 WHERE id=?'
+    db.query(noticePost, postid, function (err, data) {
+        res.send(`<script type="text/javascript">alert("성공적으로 등록되었습니다.");location.href='/';</script>`)
+    })
+})
+
+// 공지 해제기능
+router.get('/api/unNotice/:id',function(req,res){
+    let postid=req.params.id
+    let unnoticePost = 'UPDATE posts SET isNotice=0 WHERE id=?'
+    db.query(unnoticePost, postid, function (err, data) {
+        res.send(`<script type="text/javascript">alert("성공적으로 해제되었습니다.");location.href='/';</script>`)
+    })
+})
+
 module.exports = router
