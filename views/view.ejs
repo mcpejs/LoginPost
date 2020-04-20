@@ -15,7 +15,7 @@
         </div>
         <div class="panel panel-primary">
             <div class="panel-heading">
-                <h4 class="panel-title"><%=post.nickname%>&nbsp;&nbsp;&nbsp;<%=post.wtime%></h4></div>
+                <h4 class="panel-title"><%=post.author%>&nbsp;&nbsp;&nbsp;<%=post.wtime%></h4></div>
             <div class="panel-body">
                 <% if(post.isAdminAuthor){%>
                     <div class="content post" style="line-height:30px;white-space: pre-line;"><%-post.content%></div>
@@ -28,7 +28,7 @@
             var comment=comments[i] %>
             <div class="panel panel-info">
                 <div class="panel-heading">
-                    <h4 class="panel-title pull-left"><%=comment.nickname%>&nbsp;&nbsp;&nbsp;<%=comment.wtime%></h4>
+                    <h4 class="panel-title pull-left"><%=comment.author%>&nbsp;&nbsp;&nbsp;<%=comment.wtime%></h4>
                     <button class="btn pull-right" onclick="location.href='/delete_comment/<%=comment.id%>'">삭제</button>
                     <div class="clearfix"></div>
                 </div>

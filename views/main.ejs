@@ -23,7 +23,7 @@
                 var notice=notices[i] %>
                 <tr class="info">
                     <td><%=notice.id%></td>
-                    <td><%=notice.nickname%></td>
+                    <td><%=notice.author%></td>
                     <td><a href="/view_post/<%=notice.id%>"><%=notice.title%></a></td>
                     <td><%=notice.wtime%></td>
                 </tr>
@@ -42,7 +42,7 @@
                 var post=posts[i] %>
                 <tr class="active">
                     <td><%=post.id%></td>
-                    <td><%=post.nickname%></td>
+                    <td><%=post.author%></td>
                     <td><a href="/view_post/<%=post.id%>"><%=post.title%></a></td>
                     <td><%=post.wtime%></td>
                 </tr>

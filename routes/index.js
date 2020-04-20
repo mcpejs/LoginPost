@@ -93,7 +93,7 @@ router.get('/create_post', ifAuthenticated, function (req, res) {
 
 router.get('/view_post/:id', function (req, res) {
     let readsinglequery = `SELECT * FROM posts WHERE id=${req.params.id}`
-    let commentsquery = `SELECT * FROM comments WHERE postid=${req.params.id}`
+    let commentsquery = `SELECT * FROM comments WHERE post_id=${req.params.id}`
     let getIsAdmin = 'SELECT isAdmin FROM accounts WHERE name=?'
     db.query(readsinglequery, function (err, post, fields) {
         db.query(commentsquery, function (err, comments, fields) {

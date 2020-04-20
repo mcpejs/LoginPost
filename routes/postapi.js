@@ -36,8 +36,8 @@ router.post('/create_post', ifAuthenticated, ifIgnored, function (req, res) {
     }
 
     // NOW() 함수 사용을 위해서 set를 사용하지않음
-    let createquery = `INSERT INTO posts(nickname,title,content,wtime,isNotice,isAdminAuthor) VALUES("${nickname}","${title}","${content}",NOW(),0,"${isAdminAuthor}")`
-    db.query(createquery, function (err, result, fields) {
+    let createquery = `INSERT INTO posts(author,title,content,wtime,isNotice,isAdminAuthor) VALUES(?,?,?,NOW(),0,?)`
+    db.query(createquery,[nickname,title,content,isAdminAuthor], function (err, result, fields) {
         if (err) {
             console.log(err)
             // 만약 에러가 있다면
@@ -64,11 +64,13 @@ router.post('/update_post', ifAuthenticated, function (req, res) {
         return
     }
 
-    let getPostAuthorquery = `SELECT nickname FROM posts WHERE id=?`
+    let getPostAuthorquery = `SELECT author FROM posts WHERE id=?`
     let updatePostquery = `UPDATE posts set title=?,content=? where id=?;`
 
     db.query(getPostAuthorquery, postid, function (err, data, fields) {
-        let postAuthor = data[0].nickname
+        console.log(err)
+        console.log(data[0])
+        let postAuthor = data[0].author
         if (postAuthor == nickname) {
             db.query(updatePostquery, [title, content, postid], function (err, data, fields) {
                 if (err) {
@@ -88,16 +90,18 @@ router.post('/update_post', ifAuthenticated, function (req, res) {
     })
 })
 
-router.post('/delete_post', function (req, res) {
+router.post('/delete_post', ifAuthenticated,function (req, res) {
     let postid = req.body.id
     let nickname = req.session.userInfo.name
     let isAdmin = req.session.userInfo.isAdmin
 
-    let getPostAuthorquery = 'SELECT nickname FROM posts WHERE id=?'
+    let getPostAuthorquery = 'SELECT author FROM posts WHERE id=?'
     let deletePostquery = 'DELETE FROM posts WHERE id=?'
-    let deleteCommentsquery = 'DELETE FROM comments WHERE postid=?'
+    let deleteCommentsquery = 'DELETE FROM comments WHERE post_id=?'
     db.query(getPostAuthorquery, postid, function (err, authorData, fields) {
-        let postAuthor = authorData[0].nickname
+        console.log(err)
+        console.log(authorData[0])
+        let postAuthor = authorData[0].author
 
         // 요청자가 글 작성자라면
         if (nickname == postAuthor) {
@@ -134,9 +138,9 @@ router.post('/create_comment', ifAuthenticated, ifIgnored, function (req, res) {
         return
     }
 
-    let createcommentquery = `INSERT INTO comments(nickname,content,postid,wtime) VALUES("${nickname}","${content}","${postid}",NOW())`
-    let checkpostidquery = `select id from posts where id = ${postid};`
-    db.query(checkpostidquery, function (err, data, fields) {
+    let createcommentquery = `INSERT INTO comments(author,content,post_id,wtime) VALUES("${nickname}","${content}","${postid}",NOW())`
+    let checkpostexistsquery = `select id from posts where id = ${postid};`
+    db.query(checkpostexistsquery, function (err, data, fields) {
         if (err || !data.length) {
             // 만약 게시글이 없다면
             res.status(401)
@@ -159,16 +163,16 @@ router.post('/create_comment', ifAuthenticated, ifIgnored, function (req, res) {
     })
 })
 
-router.post('/delete_comment', function (req, res) {
+router.post('/delete_comment',ifAuthenticated, function (req, res) {
     let commentid = req.body.id
     let nickname = req.session.userInfo.name
     let isAdmin = req.session.userInfo.isAdmin
 
-    let getCommentAuthorquery = `SELECT postid,nickname FROM comments WHERE id=${commentid}`
+    let getCommentAuthorquery = `SELECT author,post_id FROM comments WHERE id=${commentid}`
     let deletecommentquery = `DELETE FROM comments WHERE id=${commentid}`
     db.query(getCommentAuthorquery, function (err, data, fields) {
-        let commentAuthor = data[0].nickname
-        let postid = data[0].postid
+        let commentAuthor = data[0].author
+        let postid = data[0].post_id
 
         // 요청자가 댓글 작성자라면
         if (commentAuthor == nickname) {
