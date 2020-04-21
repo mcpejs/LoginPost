@@ -53,6 +53,8 @@ let ifAdmin = (req, res, next) => {
 // 백엔드 api 라우터들
 let loginRouter = require('./routes/loginapi')
 let postRouter = require('./routes/postapi')
+
+// 글 api라우터는 로그인했을때만 접근가능 
 app.use('/api', loginRouter, putUserInfo, postRouter)
 
 // 프론트엔드 페이지 라우터

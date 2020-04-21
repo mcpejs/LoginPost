@@ -2,14 +2,6 @@ const express = require('express')
 const router = express.Router()
 db = require('../db/db')
 
-let ifAuthenticated = (req, res, next) => {
-    if (req.isAuthenticated()) {
-        next()
-        return
-    }
-    res.redirect('/login')
-}
-
 let ifIgnored = (req, res, next) => {
     // 차단 당했다면
     if (req.session.userInfo.isIgnore) {
@@ -19,15 +11,15 @@ let ifIgnored = (req, res, next) => {
     }
     // 차단 당하지 않았다면
     next()
-    
+
 }
 
-router.post('/create_post', ifAuthenticated, ifIgnored, function (req, res) {
+router.post('/create_post', ifIgnored, function (req, res) {
 
     let nickname = req.session.userInfo.name
     let title = req.body.title
     let content = req.body.content
-    let isAdminAuthor=req.session.userInfo.isAdmin
+    let isAdminAuthor = req.session.userInfo.isAdmin
     if (ishaveEmpty(nickname, title, console)) {
         // 정보가 잘못 제출되었을때
         res.status(401)
@@ -37,7 +29,7 @@ router.post('/create_post', ifAuthenticated, ifIgnored, function (req, res) {
 
     // NOW() 함수 사용을 위해서 set를 사용하지않음
     let createquery = `INSERT INTO posts(author,title,content,wtime,isNotice,isAdminAuthor) VALUES(?,?,?,NOW(),0,?)`
-    db.query(createquery,[nickname,title,content,isAdminAuthor], function (err, result, fields) {
+    db.query(createquery, [nickname, title, content, isAdminAuthor], function (err, result, fields) {
         if (err) {
             console.log(err)
             // 만약 에러가 있다면
@@ -51,7 +43,7 @@ router.post('/create_post', ifAuthenticated, ifIgnored, function (req, res) {
     })
 })
 
-router.post('/update_post', ifAuthenticated, function (req, res) {
+router.post('/update_post', function (req, res) {
     let postid = req.body.id
     let nickname = req.session.userInfo.name
     let title = req.body.title
@@ -68,8 +60,6 @@ router.post('/update_post', ifAuthenticated, function (req, res) {
     let updatePostquery = `UPDATE posts set title=?,content=? where id=?;`
 
     db.query(getPostAuthorquery, postid, function (err, data, fields) {
-        console.log(err)
-        console.log(data[0])
         let postAuthor = data[0].author
         if (postAuthor == nickname) {
             db.query(updatePostquery, [title, content, postid], function (err, data, fields) {
@@ -90,31 +80,31 @@ router.post('/update_post', ifAuthenticated, function (req, res) {
     })
 })
 
-router.post('/delete_post', ifAuthenticated,function (req, res) {
+router.post('/delete_post', function (req, res) {
     let postid = req.body.id
     let nickname = req.session.userInfo.name
     let isAdmin = req.session.userInfo.isAdmin
 
     let getPostAuthorquery = 'SELECT author FROM posts WHERE id=?'
+
     let deletePostquery = 'DELETE FROM posts WHERE id=?'
     let deleteCommentsquery = 'DELETE FROM comments WHERE post_id=?'
+    let deleteLikequery = 'DELETE FROM accountLikes WHERE post_id=?'
     db.query(getPostAuthorquery, postid, function (err, authorData, fields) {
-        console.log(err)
-        console.log(authorData[0])
         let postAuthor = authorData[0].author
 
         // 요청자가 글 작성자라면
         if (nickname == postAuthor) {
-            // 댓글 삭제후 글삭제
-            db.query(deleteCommentsquery, postid, () => db.query(deletePostquery, postid))
+            // 댓글과 좋아요 삭제후 글삭제
+            db.query(deleteCommentsquery, postid, () => db.query(deleteLikequery, postid, () => db.query(deletePostquery, postid)))
             res.status(200)
             res.send(`<script type="text/javascript">alert("성공적으로 삭제되었습니다.");location.href = '/';</script>`)
         }
 
         // 요청자가 관리자라면
         else if (isAdmin) {
-            // 댓글 삭제후 글삭제
-            db.query(deleteCommentsquery, postid, () => db.query(deletePostquery, postid))
+            // 댓글과 좋아요 삭제후 글삭제
+            db.query(deleteCommentsquery, postid, () => db.query(deleteLikequery, postid, () => db.query(deletePostquery, postid)))
             res.status(200)
             res.send(`<script type="text/javascript">alert("관리자 권한으로 삭제되었습니다.");location.href = '/';</script>`)
         }
@@ -127,7 +117,7 @@ router.post('/delete_post', ifAuthenticated,function (req, res) {
     })
 })
 
-router.post('/create_comment', ifAuthenticated, ifIgnored, function (req, res) {
+router.post('/create_comment', ifIgnored, function (req, res) {
     let nickname = req.session.userInfo.name
     let content = req.body.content
     let postid = req.body.postid
@@ -163,7 +153,7 @@ router.post('/create_comment', ifAuthenticated, ifIgnored, function (req, res) {
     })
 })
 
-router.post('/delete_comment',ifAuthenticated, function (req, res) {
+router.post('/delete_comment', function (req, res) {
     let commentid = req.body.id
     let nickname = req.session.userInfo.name
     let isAdmin = req.session.userInfo.isAdmin
@@ -198,12 +188,75 @@ router.post('/delete_comment',ifAuthenticated, function (req, res) {
     })
 })
 
+// 게시글 좋아요
+router.get('/like_post/:id', function (req, res) {
+    let post_id = req.params.id
+    let nickname = req.session.userInfo.name
+
+    let checkDupeLike = 'SELECT * FROM accountlikes where name=? and post_id=?'
+    let likePost = 'INSERT INTO accountlikes SET name=?,post_id=?'
+    // 추천정보 존재여부 확인
+    db.query(checkDupeLike, [nickname, post_id], function (err, data) {
+        if (data[0]) {
+            // 이미 추천 정보가 있을때
+            res.status(400)
+            res.send(`<script type="text/javascript">alert("이미 추천한 게시글입니다.");history.back();</script>`)
+            return
+        }
+        // 추천정보가 없을때
+
+        // 추천 정보 넣기
+        db.query(likePost, [nickname, post_id], function (err, data) {
+            if (err) {
+                console.log(err)
+                // 만약 에러가 있다면
+                res.status(401)
+                res.send(`<script type="text/javascript">alert("예상치 못한 오류");history.back();</script>`)
+                return
+            }
+            res.send(`<script type="text/javascript">alert("성공적으로 추천되었습니다");location.href = '/view_post/${post_id}';</script>`)
+        })
+    })
+})
+
+// 게시글 좋아요 취소
+router.get('/unLike_post/:id', function (req, res) {
+    let post_id = req.params.id
+    let nickname = req.session.userInfo.name
+
+    let checkDupeLike = 'SELECT * FROM accountlikes where name=? and post_id=?'
+    let likePost = 'DELETE FROM accountlikes WHERE name=? and post_id=?'
+    // 추천정보 존재여부 확인
+    db.query(checkDupeLike, [nickname, post_id], function (err, data) {
+        if (!data[0]) {
+            // 추천정보가 없을때
+            res.status(400)
+            res.send(`<script type="text/javascript">alert("추천하지 않은 게시글입니다.");history.back();</script>`)
+            return
+        }
+
+        // 추천정보가 있을때
+
+        // 추천 정보 삭제
+        db.query(likePost, [nickname, post_id], function (err, data) {
+            if (err) {
+                console.log(err)
+                // 만약 에러가 있다면
+                res.status(401)
+                res.send(`<script type="text/javascript">alert("예상치 못한 오류");history.back();</script>`)
+                return
+            }
+            res.send(`<script type="text/javascript">alert("성공적으로 취소되었습니다");location.href = '/view_post/${post_id}';</script>`)
+        })
+    })
+})
+
 // 값없는 변수가 포함되있는지 확인하는 함수
 function ishaveEmpty(...array) {
     let flag = false
     array.forEach(function (element) {
         if (!Boolean(element)) {
-            flag = true 
+            flag = true
             return
         }
     })

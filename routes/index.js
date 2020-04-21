@@ -92,17 +92,21 @@ router.get('/create_post', ifAuthenticated, function (req, res) {
 })
 
 router.get('/view_post/:id', function (req, res) {
-    let readsinglequery = `SELECT * FROM posts WHERE id=${req.params.id}`
-    let commentsquery = `SELECT * FROM comments WHERE post_id=${req.params.id}`
-    let getIsAdmin = 'SELECT isAdmin FROM accounts WHERE name=?'
-    db.query(readsinglequery, function (err, post, fields) {
-        db.query(commentsquery, function (err, comments, fields) {
+    let post_id=req.params.id
+    let readsinglequery = `SELECT *,(SELECT count(name) FROM accountlikes where post_id=?) as likeCount FROM posts WHERE id=?`
+    let commentsquery = `SELECT * FROM comments WHERE post_id=?`
+    let getUserInfo = 'SELECT *,(SELECT COUNT(*) FROM accountlikes where name=? and post_id=?) as isLiked FROM accounts WHERE name=?'
+    // 글 내용읽기
+    db.query(readsinglequery,[post_id,post_id], function (err, post, fields) {
+        // 댓글 내용읽기
+        db.query(commentsquery,post_id, function (err, comments, fields) {
             if (req.isAuthenticated()) {
-                db.query(getIsAdmin, req.user, function (err, userData) {
+                // 관리자
+                db.query(getUserInfo, [req.user,post_id,req.user], function (err, userData) {
                     res.render('../views/view', {
                         post: post[0],
                         comments: comments,
-                        isAdmin: userData[0].isAdmin
+                        userInfo: userData[0]
                     })
                 })
                 return
@@ -110,7 +114,7 @@ router.get('/view_post/:id', function (req, res) {
             res.render('../views/view', {
                 post: post[0],
                 comments: comments,
-                isAdmin: false
+                userInfo: false
             })
         })
 
