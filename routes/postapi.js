@@ -28,7 +28,7 @@ router.post('/create_post', ifIgnored, function (req, res) {
     }
 
     // NOW() 함수 사용을 위해서 set를 사용하지않음
-    let createquery = `INSERT INTO posts(author,title,content,wtime,isNotice,isAdminAuthor) VALUES(?,?,?,NOW(),0,?)`
+    const createquery = `INSERT INTO posts(author,title,content,wtime,isNotice,isAdminAuthor) VALUES(?,?,?,NOW(),0,?)`
     db.query(createquery, [nickname, title, content, isAdminAuthor], function (err, result, fields) {
         if (err) {
             console.log(err)
@@ -56,8 +56,8 @@ router.post('/update_post', function (req, res) {
         return
     }
 
-    let getPostAuthorquery = `SELECT author FROM posts WHERE id=?`
-    let updatePostquery = `UPDATE posts set title=?,content=? where id=?;`
+    const getPostAuthorquery = `SELECT author FROM posts WHERE id=?`
+    const updatePostquery = `UPDATE posts set title=?,content=? where id=?;`
 
     db.query(getPostAuthorquery, postid, function (err, data, fields) {
         let postAuthor = data[0].author
@@ -85,11 +85,11 @@ router.post('/delete_post', function (req, res) {
     let nickname = req.session.userInfo.name
     let isAdmin = req.session.userInfo.isAdmin
 
-    let getPostAuthorquery = 'SELECT author FROM posts WHERE id=?'
+    const getPostAuthorquery = 'SELECT author FROM posts WHERE id=?'
 
-    let deletePostquery = 'DELETE FROM posts WHERE id=?'
-    let deleteCommentsquery = 'DELETE FROM comments WHERE post_id=?'
-    let deleteLikequery = 'DELETE FROM accountLikes WHERE post_id=?'
+    const deletePostquery = 'DELETE FROM posts WHERE id=?'
+    const deleteCommentsquery = 'DELETE FROM comments WHERE post_id=?'
+    const deleteLikequery = 'DELETE FROM accountLikes WHERE post_id=?'
     db.query(getPostAuthorquery, postid, function (err, authorData, fields) {
         let postAuthor = authorData[0].author
 
@@ -128,8 +128,8 @@ router.post('/create_comment', ifIgnored, function (req, res) {
         return
     }
 
-    let createcommentquery = `INSERT INTO comments(author,content,post_id,wtime) VALUES("${nickname}","${content}","${postid}",NOW())`
-    let checkpostexistsquery = `select id from posts where id = ${postid};`
+    const createcommentquery = `INSERT INTO comments(author,content,post_id,wtime) VALUES("${nickname}","${content}","${postid}",NOW())`
+    const checkpostexistsquery = `select id from posts where id = ${postid};`
     db.query(checkpostexistsquery, function (err, data, fields) {
         if (err || !data.length) {
             // 만약 게시글이 없다면
@@ -158,15 +158,15 @@ router.post('/delete_comment', function (req, res) {
     let nickname = req.session.userInfo.name
     let isAdmin = req.session.userInfo.isAdmin
 
-    let getCommentAuthorquery = `SELECT author,post_id FROM comments WHERE id=${commentid}`
-    let deletecommentquery = `DELETE FROM comments WHERE id=${commentid}`
-    db.query(getCommentAuthorquery, function (err, data, fields) {
+    const getCommentAuthorquery = `SELECT author,post_id FROM comments WHERE id=?`
+    const deletecommentquery = `DELETE FROM comments WHERE id=?`
+    db.query(getCommentAuthorquery,commentid, function (err, data, fields) {
         let commentAuthor = data[0].author
         let postid = data[0].post_id
 
         // 요청자가 댓글 작성자라면
         if (commentAuthor == nickname) {
-            db.query(deletecommentquery, function (err, data, fields) {
+            db.query(deletecommentquery,commentid, function (err, data, fields) {
                 res.status(200)
                 res.send(`<script type="text/javascript">alert("성공적으로 삭제되었습니다.");location.href='/view_post/${postid}';</script>`)
             })
@@ -193,8 +193,8 @@ router.get('/like_post/:id', function (req, res) {
     let post_id = req.params.id
     let nickname = req.session.userInfo.name
 
-    let checkDupeLike = 'SELECT * FROM accountlikes where name=? and post_id=?'
-    let likePost = 'INSERT INTO accountlikes SET name=?,post_id=?'
+    const checkDupeLike = 'SELECT * FROM accountlikes where name=? and post_id=?'
+    const likePost = 'INSERT INTO accountlikes SET name=?,post_id=?'
     // 추천정보 존재여부 확인
     db.query(checkDupeLike, [nickname, post_id], function (err, data) {
         if (data[0]) {
@@ -224,8 +224,8 @@ router.get('/unLike_post/:id', function (req, res) {
     let post_id = req.params.id
     let nickname = req.session.userInfo.name
 
-    let checkDupeLike = 'SELECT * FROM accountlikes where name=? and post_id=?'
-    let likePost = 'DELETE FROM accountlikes WHERE name=? and post_id=?'
+    const checkDupeLike = 'SELECT * FROM accountlikes where name=? and post_id=?'
+    const likePost = 'DELETE FROM accountlikes WHERE name=? and post_id=?'
     // 추천정보 존재여부 확인
     db.query(checkDupeLike, [nickname, post_id], function (err, data) {
         if (!data[0]) {

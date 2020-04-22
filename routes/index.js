@@ -61,8 +61,8 @@ router.get('/list_post/:page', function (req, res) {
             startIndex = postperpage * (requestPage - 1)
         }
 
-        let readpost = `SELECT * FROM posts WHERE isNotice=0 ORDER BY id desc LIMIT ${startIndex},${postperpage}`
-        let readNotice = 'SELECT * FROM posts WHERE isNotice=1 ORDER BY id desc'
+        const readpost = `SELECT * FROM posts WHERE isNotice=0 ORDER BY id desc LIMIT ${startIndex},${postperpage}`
+        const readNotice = 'SELECT * FROM posts WHERE isNotice=1 ORDER BY id desc'
         db.query(readpost, function (err, posts, fields) {
             db.query(readNotice, function (err, notices) {
                 res.render('../views/main', {
@@ -93,15 +93,15 @@ router.get('/create_post', ifAuthenticated, function (req, res) {
 
 router.get('/view_post/:id', function (req, res) {
     let post_id=req.params.id
-    let readsinglequery = `SELECT *,(SELECT count(name) FROM accountlikes where post_id=?) as likeCount FROM posts WHERE id=?`
-    let commentsquery = `SELECT * FROM comments WHERE post_id=?`
-    let getUserInfo = 'SELECT *,(SELECT COUNT(*) FROM accountlikes where name=? and post_id=?) as isLiked FROM accounts WHERE name=?'
+    const readsinglequery = `SELECT *,(SELECT count(name) FROM accountlikes where post_id=?) as likeCount FROM posts WHERE id=?`
+    const commentsquery = `SELECT * FROM comments WHERE post_id=?`
+    const getUserInfo = 'SELECT *,(SELECT COUNT(*) FROM accountlikes where name=? and post_id=?) as isLiked FROM accounts WHERE name=?'
     // 글 내용읽기
     db.query(readsinglequery,[post_id,post_id], function (err, post, fields) {
         // 댓글 내용읽기
         db.query(commentsquery,post_id, function (err, comments, fields) {
             if (req.isAuthenticated()) {
-                // 관리자
+                // 로그인됐다면 유저정보 가져오기
                 db.query(getUserInfo, [req.user,post_id,req.user], function (err, userData) {
                     res.render('../views/view', {
                         post: post[0],

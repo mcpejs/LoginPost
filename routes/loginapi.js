@@ -80,7 +80,7 @@ router.post('/register', function (req, res) {
         name: bodynickname,
         password: hashedpass
     }
-    let createaccountquery = 'insert into accounts set ?'
+    const createaccountquery = 'insert into accounts set ?'
     db.query(createaccountquery, account, function (err, data) {
         if (err) {
             // 쿼리문에 오류가 있다면
