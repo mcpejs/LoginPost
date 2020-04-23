@@ -2,6 +2,7 @@ const express = require('express');
 const session = require('express-session');
 let passport = require('passport')
 const app = express()
+const request = require('request')
 let db = require('./db/db')
 
 app.use(session({
@@ -65,4 +66,13 @@ app.use('/', indexRouter)
 let adminRouter = require('./routes/admin')
 app.use('/admin', putUserInfo, ifAdmin, adminRouter)
 
+// TODO: post로 고치기
+app.get('/tool/spellCheck/:text', function (req, res) {
+    let targetText = req.params.text
+    let url = `https://m.search.naver.com/p/csearch/ocontent/util/SpellerProxy?q=${encodeURI(targetText)}&where=nexearch&color_blindness=0&_=1587552692822`
+    request.get(url, function (err, result) {
+        let resultJson = JSON.parse(result.body)
+        res.send(resultJson['message']['result']['notag_html'])
+    })
+})
 app.listen(3000)

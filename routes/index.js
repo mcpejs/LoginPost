@@ -92,17 +92,17 @@ router.get('/create_post', ifAuthenticated, function (req, res) {
 })
 
 router.get('/view_post/:id', function (req, res) {
-    let post_id=req.params.id
+    let post_id = req.params.id
     const readsinglequery = `SELECT *,(SELECT count(name) FROM accountlikes where post_id=?) as likeCount FROM posts WHERE id=?`
     const commentsquery = `SELECT * FROM comments WHERE post_id=?`
     const getUserInfo = 'SELECT *,(SELECT COUNT(*) FROM accountlikes where name=? and post_id=?) as isLiked FROM accounts WHERE name=?'
     // 글 내용읽기
-    db.query(readsinglequery,[post_id,post_id], function (err, post, fields) {
+    db.query(readsinglequery, [post_id, post_id], function (err, post, fields) {
         // 댓글 내용읽기
-        db.query(commentsquery,post_id, function (err, comments, fields) {
+        db.query(commentsquery, post_id, function (err, comments, fields) {
             if (req.isAuthenticated()) {
                 // 로그인됐다면 유저정보 가져오기
-                db.query(getUserInfo, [req.user,post_id,req.user], function (err, userData) {
+                db.query(getUserInfo, [req.user, post_id, req.user], function (err, userData) {
                     res.render('../views/view', {
                         post: post[0],
                         comments: comments,

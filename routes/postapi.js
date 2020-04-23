@@ -160,13 +160,13 @@ router.post('/delete_comment', function (req, res) {
 
     const getCommentAuthorquery = `SELECT author,post_id FROM comments WHERE id=?`
     const deletecommentquery = `DELETE FROM comments WHERE id=?`
-    db.query(getCommentAuthorquery,commentid, function (err, data, fields) {
+    db.query(getCommentAuthorquery, commentid, function (err, data, fields) {
         let commentAuthor = data[0].author
         let postid = data[0].post_id
 
         // 요청자가 댓글 작성자라면
         if (commentAuthor == nickname) {
-            db.query(deletecommentquery,commentid, function (err, data, fields) {
+            db.query(deletecommentquery, commentid, function (err, data, fields) {
                 res.status(200)
                 res.send(`<script type="text/javascript">alert("성공적으로 삭제되었습니다.");location.href='/view_post/${postid}';</script>`)
             })
