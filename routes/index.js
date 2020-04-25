@@ -61,7 +61,7 @@ router.get('/list_post/:page', function (req, res) {
             startIndex = postperpage * (requestPage - 1)
         }
 
-        const readpost = `SELECT * FROM posts WHERE isNotice=0 ORDER BY id desc LIMIT ${startIndex},${postperpage}`
+        const readpost = `SELECT posts.*,ifnull(likes.likecount,0) AS likeCount FROM posts LEFT JOIN (SELECT post_id,count(*) AS likecount FROM accountlikes GROUP BY post_id) AS likes ON posts.id=likes.post_id WHERE isNotice = 0 ORDER BY id DESC LIMIT ${startIndex},${postperpage}`
         const readNotice = 'SELECT * FROM posts WHERE isNotice=1 ORDER BY id desc'
         db.query(readpost, function (err, posts, fields) {
             db.query(readNotice, function (err, notices) {
