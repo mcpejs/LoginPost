@@ -95,7 +95,6 @@ router.post('/delete_post', function (req, res) {
 
         // 요청자가 글 작성자라면
         if (nickname == postAuthor) {
-            // 댓글과 좋아요 삭제후 글삭제
             db.query(deleteCommentsquery, postid, () => db.query(deleteLikequery, postid, () => db.query(deletePostquery, postid)))
             res.status(200)
             res.send(`<script type="text/javascript">alert("성공적으로 삭제되었습니다.");location.href = '/';</script>`)
@@ -103,7 +102,6 @@ router.post('/delete_post', function (req, res) {
 
         // 요청자가 관리자라면
         else if (isAdmin) {
-            // 댓글과 좋아요 삭제후 글삭제
             db.query(deleteCommentsquery, postid, () => db.query(deleteLikequery, postid, () => db.query(deletePostquery, postid)))
             res.status(200)
             res.send(`<script type="text/javascript">alert("관리자 권한으로 삭제되었습니다.");location.href = '/';</script>`)
