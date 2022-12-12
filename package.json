@@ -8,7 +8,7 @@
   "dependencies": {
     "crypto": "^1.0.1",
     "ejs": "^3.0.1",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "express-session": "^1.17.0",
     "mysql": "^2.18.1",
     "passport": "^0.4.1",
